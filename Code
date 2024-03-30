@@ -1,0 +1,194 @@
+Q1) Load the csv file (Top_10000_Movies_assignmnet.csv)
+import numpy as np
+import pandas as pd
+assignment=pd.read_csv("Top_10000_Movies_assignmnet.csv",encoding="latin-1",engine='python')
+display(assignment)
+
+assignment.describe()
+
+Q2) How many total record are there which have a valid id?
+valid_id= assignment.dropna(subset=['id'])
+total_valid_id = valid_id.shape[0]
+print("There are",str(total_valid_id)+" records with a valid ID")
+
+Q3) How many original language are found in the dataset?
+original_languages = assignment['original_language'].nunique()
+print("There are "+str(original_languages)+ " original languages in the dataset.")
+
+Q4) Show count for all languages? Meaning if there were 107 moves in English or 47 in Japanese or 10 in Hindi etc.
+print("The count for all languages are given below:\n", assignment['original_language'].value_counts())
+
+Q5)Convert original_language to full English name like en should be English, ja should be Japanese etc.
+!pip install langdetect 
+!pip install pycountry
+from langdetect import detect
+import pycountry
+Languages = assignment['original_language'].unique()
+LANG = []
+​
+for lang in Languages:
+    try:
+        # Attempt to get the language name
+        language = pycountry.languages.get(alpha_2=lang)
+        if language:
+            LANG.append(language.name)
+        else:
+            # If language not found, append 'Unknown'
+            LANG.append('Unknown')
+    except LookupError:
+        # If there's a lookup error, append 'Unknown'
+        LANG.append('Unknown')
+​
+print("Languages in the dataset: \n")
+print(LANG)
+Languages in the dataset: 
+
+
+Q6) How many original_title and described in English? You need to show the work that you are removing the other languages from the dataset.
+english_title=assignment[assignment['original_language']=='en']
+print("The number of Original title described in English are :",len(english_title))
+#display(english_title)
+The number of Original title described in English are : 7799
+Q7) Which is the most popular (look at popularity) movie, give its name (original_title)?
+most_popular=assignment.loc[assignment['popularity'].idxmax()]
+print("The most popular movie hs a popularity index of",most_popular['popularity'])
+#display(most_popular)
+title= (most_popular['original_title'])
+print("The most popular movie does not have its title recorded and is instead",title)
+The most popular movie hs a popularity index of 6800.0
+The most popular movie does not have its title recorded and is instead nan
+Q8) Which is the least popular (look at popularity) movie, give its name (original_title)?
+least_popular=assignment.loc[assignment['popularity'].idxmin()]
+print("The least popular movie has a popularity index of",least_popular['popularity'])
+#display(least_popular)
+title= (least_popular['original_title'])
+print("The least popular movie is",title)
+The least popular movie has a popularity index of 6.269
+The least popular movie is ÐÑÐ¾ÐºÐ»ÑÑÑÐ¹ ÑÐ¸Ð½Ð¾Ð²Ð½Ð¸Ðº
+Q9) Which move has the earliest release date in your dataset, give the date and the name of the movie?
+assignment['release_date'] = pd.to_datetime(assignment['release_date'])
+#assignment['release_date'].head()
+earliest_release_date=(assignment.iloc[assignment['release_date'].argmin()])
+print("The earliest release date was on",str(earliest_release_date['release_date']) + " and the title of the movie was",earliest_release_date['original_title'])
+The earliest release date was on 1902-04-17 00:00:00 and the title of the movie was Le Voyage dans la Lune
+Q10)Which move has the latest release date in your dataset, give the date and the name of the movie?
+assignment['release_date'] = pd.to_datetime(assignment['release_date'])
+#assignment['release_date'].head()
+latest_release_date=(assignment.iloc[assignment['release_date'].argmax()])
+print("The latest release date is on",str(latest_release_date['release_date']) + " and the title of the movie is",latest_release_date['original_title'])
+The latest release date is on 2028-12-20 00:00:00 and the title of the movie is Avatar 5
+Q12) What is the highest vote_count of a movie, give the name and the vote count.
+max_vote_count=assignment.loc[assignment['vote_count'].idxmax()]
+print('The highest vote count for a movie is',str(max_vote_count["vote_count"])+" and the title of the movie is", max_vote_count['original_title'])
+​
+The highest vote count for a movie is 30184.0 and the title of the movie is Inception
+Q13) What is the average vote_count of all the movies, is this a good statics? Why or why not?
+vote_avg=(assignment['vote_count'].mean())
+print("The average vote count for all the movies is",vote_avg)
+print("\nHowever, this is not a good statistic because for 10017 rows the average is amounting to just 1314.8 which indicates that there are many missing values present in the dataset.")
+The average vote count for all the movies is 1314.8725382385285
+
+However, this is not a good statistic because for 10017 rows the average is amounting to just 1314.8 which indicates that there are many missing values present in the dataset.
+Q14) What is the lowest vote_count of a movie, give the name and the vote count. (how would you treat “0” here?)
+min_vote_count=assignment.loc[assignment['vote_count'].idxmin()]
+print('The highest vote count for a movie is',str(min_vote_count["vote_count"])+" and the title of the movie is", min_vote_count['original_title'])
+print("Here, the value 0 is treated as either that no one voted for the movie or we can assume that during data entry the values were lost/misplaced/not recorded appropriately. ")
+The highest vote count for a movie is 0.0 and the title of the movie is ç½å¤©æ»æ¯å¤ªè¿æ¼«é¿
+Here, the value 0 is treated as either that no one voted for the movie or we can assume that during data entry the values were lost/misplaced/not recorded appropriately. 
+Observation : For the above question, there are multiple movies with a vote_count 0. However, I am displaying only the first movie that is fetched from the query.
+Q15) How many "English" movies are there without tag lines?
+english_movies_without_taglines = assignment[(assignment['original_language'] == 'en') & assignment['tagline'].isnull()]
+#display(english_movies_without_taglines)
+print("The number of English movies without any taglines is",len(english_movies_without_taglines))
+​
+The number of English movies without any taglines is 1512
+Q16) How many genre “['Science Fiction', 'Thriller']” movies are there?
+count = (assignment['genre']=="['Science Fiction', 'Thriller']").sum()
+print("The number of “['Science Fiction', 'Thriller']” genre movies are",count)
+The number of “['Science Fiction', 'Thriller']” genre movies are 23
+Q17) How many blank records are there for genre?
+blank_records=pd.isnull(assignment['genre']).sum()
+print("The number of blank records for genre are :",blank_records)
+The number of blank records for genre are : 17
+Q18) Which English movie made the most money revenue in ['Thriller', 'Crime'] genre
+english_thriller_crime_movies = assignment[(assignment['genre'] == "['Thriller', 'Crime']") & (assignment['original_language'] == 'en')]
+max_revenue_movie = english_thriller_crime_movies.loc[english_thriller_crime_movies['revenue'].idxmax()]
+​
+# Extract the movie title and revenue
+movie_title = max_revenue_movie['original_title']
+revenue = max_revenue_movie['revenue']
+​
+print(f"The English movie with the highest revenue in the ['Thriller', 'Crime'] genre is '{movie_title}' with a revenue of ${revenue:.2f}.")
+The English movie with the highest revenue in the ['Thriller', 'Crime'] genre is 'Ocean's Eleven' with a revenue of $450717150.00.
+Q19) Which Japanese movie made the most money revenue in ['Action', 'Horror'] genre. Give the name of the movie (Can you convert the name in English? try)
+japanese_thriller_crime_movies = assignment[(assignment['genre'] == "['Action', 'Horror']") & (assignment['original_language'] == 'ja')]
+​
+# Find the row with the maximum revenue among these movies
+max_revenue_movie = japanese_thriller_crime_movies.loc[japanese_thriller_crime_movies['revenue'].idxmax()]
+​
+# Extract the movie title and revenue
+movie_title = max_revenue_movie['original_title']
+revenue = max_revenue_movie['revenue']
+​
+print(f"The Japanese movie with the highest revenue in the ['Action', 'Horror'] genre is '{movie_title}' with a revenue of ${revenue:.2f}.")
+​
+The Japanese movie with the highest revenue in the ['Action', 'Horror'] genre is 'ã¨ã¯ã¹ã¯ã­ã¹ãé­å¢ä¼èª¬' with a revenue of $0.00.
+Observation : For the above question, there is only one Japanese movie in the ['Action', 'Horror'] genre and the revenue recorded is 0.
+import pandas as pd
+from googletrans import Translator
+translator = Translator()
+japanese_name = movie_title['original_title'].apply(translator.translate, src='ja', dest='en').apply(getattr, args=('text',))
+print(japanese_name)
+!pip install googletrans
+import pandas as pd
+from googletrans import Translator
+​
+​
+​
+# Filter the DataFrame for Japanese movies in the ['Action', 'Horror'] genre
+japanese_action_horror_movies = assignment[(assignment['genre'] == "['Action', 'Horror']") & (assignment['original_language'] == 'ja')]
+​
+# Find the row with the maximum revenue among these movies
+max_revenue_movie = japanese_action_horror_movies.loc[japanese_action_horror_movies['revenue'].idxmax()]
+​
+# Extract the movie title and revenue
+movie_title = max_revenue_movie['original_title']
+revenue = max_revenue_movie['revenue']
+​
+print(f"The Japanese movie with the highest revenue in the ['Action', 'Horror'] genre is '{movie_title}' with a revenue of ${revenue:.2f}.")
+​
+# Translate the movie title from Japanese to English
+from googletrans import Translator
+translator = Translator()
+translated_title = translator.translate(movie_title, src='ja', dest='en').text
+​
+# Print the translated movie title
+print("Translated title in English:", translated_title)
+​
+I have attempted two appraoches to convert the Japanese movie name to English, however it is not successful.
+Q20) Which of the French movies has the longest run time, give all the details of this movie. Where do you think this movie ranks in comparison to all the movies in the dataset.
+french_movies_df = assignment[(assignment['original_language'] == 'fr')]
+longest_runtime_movie = french_movies_df.loc[french_movies_df['runtime'].idxmax()]
+print("French movie with the longest runtime:")
+print(longest_runtime_movie)
+total_movies = len(assignment)
+runtime_rank = (french_movies_df['popularity'] > longest_runtime_movie['popularity']).sum() + 1
+print(f"\nThis French movie, ranks #{runtime_rank} out of {total_movies} movies in the dataset based on popularity.")
+​
+French movie with the longest runtime:
+Unnamed: 0                                                        9578
+id                                                               11986
+original_language                                                   fr
+original_title                                          37Â°2 le matin
+popularity                                                       8.061
+release_date                                       1986-04-09 00:00:00
+vote_average                                                       7.3
+vote_count                                                         257
+genre                                             ['Drama', 'Romance']
+overview             Betty Blue, a mentally unbalanced and sexually...
+revenue                                                    2.00382e+06
+runtime                                                            185
+tagline                                                            NaN
+Name: 1385, dtype: object
+
+This French movie, ranks #282 out of 10017 movies in the dataset based on popularity.
